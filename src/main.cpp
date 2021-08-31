@@ -21,43 +21,9 @@ bool bPrintMes;
 BlueDot_BME280 bme1;
 int bme1Detected = 0;   
 
-
-void setup() {
-  Serial.begin(9600);
-  Wire.begin(SDA_PIN, SCL_PIN, I2C_SLAVE);
-  Wire.onRequest(requestEvent);
-  Wire.onReceive(receiveEvent);
-
-  bme1.parameter.communication = 1;
-  bme1.parameter.SPI_cs = D3;        
-  bme1.parameter.SPI_mosi = D2;                       
-  bme1.parameter.SPI_miso = D4;                       
-  bme1.parameter.SPI_sck = D1; 
-  bme1.parameter.I2CAddress = 0x77;
-  bme1.parameter.sensorMode = 0b11; 
-  bme1.parameter.IIRfilter = 0b100;
-  bme1.parameter.humidOversampling = 0b101;
-  bme1.parameter.tempOversampling = 0b101;
-  bme1.parameter.pressOversampling = 0b101;
-  bme1.parameter.tempOutsideCelsius = 15; 
-  bme1.parameter.tempOutsideFahrenheit = 59;
-
-    if (bme1.init() != 0x60)
-  {    
-    Serial.println(F("Ops! First BME280 Sensor not found!"));
-    bme1Detected = 0;
-  }
-
-  else
-  {
-    Serial.println(F("First BME280 Sensor detected!"));
-    bme1Detected = 1;
-  }
-
-  
-}
-
-void loop() {}
+//######################################################################
+// Wire On Request #####################################################
+//######################################################################
 
 void requestEvent() {
   
@@ -105,6 +71,10 @@ void requestEvent() {
   
 }
 
+//######################################################################
+// Wire On Receive #####################################################
+//######################################################################
+
 void receiveEvent(size_t howMany) {
   Serial.println("Received something");
   (void) howMany;
@@ -116,3 +86,45 @@ void receiveEvent(size_t howMany) {
   }
     Serial.println(req);
 }
+
+//######################################################################
+// Setup ###############################################################
+//######################################################################
+
+void setup() {
+  Serial.begin(9600);
+  Wire.begin(SDA_PIN, SCL_PIN, I2C_SLAVE);
+  Wire.onRequest(requestEvent);
+  Wire.onReceive(receiveEvent);
+
+  bme1.parameter.communication = 1;
+  bme1.parameter.SPI_cs = D3;        
+  bme1.parameter.SPI_mosi = D2;                       
+  bme1.parameter.SPI_miso = D4;                       
+  bme1.parameter.SPI_sck = D1; 
+  bme1.parameter.I2CAddress = 0x77;
+  bme1.parameter.sensorMode = 0b11; 
+  bme1.parameter.IIRfilter = 0b100;
+  bme1.parameter.humidOversampling = 0b101;
+  bme1.parameter.tempOversampling = 0b101;
+  bme1.parameter.pressOversampling = 0b101;
+  bme1.parameter.tempOutsideCelsius = 15; 
+  bme1.parameter.tempOutsideFahrenheit = 59;
+
+    if (bme1.init() != 0x60)
+  {    
+    Serial.println(F("Ops! First BME280 Sensor not found!"));
+    bme1Detected = 0;
+  }
+
+  else
+  {
+    Serial.println(F("First BME280 Sensor detected!"));
+    bme1Detected = 1;
+  }
+
+  
+}
+
+void loop() {}
+
