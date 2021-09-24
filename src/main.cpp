@@ -1,7 +1,7 @@
 // WireCommSlave between two ESP8266 ###################################
-// Masterthesis V 0.1.0 ################################################
+// Masterthesis V 1.0.0 ################################################
 // by Joel Lehmann #####################################################
-// 30.08.2021 ##########################################################
+// 24.09.2021 ##########################################################
 
 #include <Arduino.h>
 #include <Wire.h>
@@ -9,6 +9,11 @@
 
 #define SDA_PIN D2
 #define SCL_PIN D3
+
+//######################################################################
+// Constants, Variables and Instances ##################################
+//######################################################################
+
 const int16_t I2C_MASTER = 0x42;
 const int16_t I2C_SLAVE = 0x01;
 char request;
@@ -17,7 +22,6 @@ int cnt = 0;
 char json[120];
 bool bPrintMeta;
 bool bPrintMes;
-
 BlueDot_BME280 bme1;
 int bme1Detected = 0;   
 
@@ -26,7 +30,6 @@ int bme1Detected = 0;
 //######################################################################
 
 void requestEvent() {
-  
   if (req == "reqMetaCount")
   {
     Wire.write("5\n");
@@ -35,16 +38,21 @@ void requestEvent() {
   }else if (req == "0" && bPrintMeta)
   {
     Wire.write("DEVID:BME280EXT1\0");  
-  }else if (req == "1" && bPrintMeta){
+  }else if (req == "1" && bPrintMeta)
+  {
     Wire.write("SENSOR:BME280\0");
-  }else if (req == "2" && bPrintMeta){
+  }else if (req == "2" && bPrintMeta)
+  {
     Wire.write("DATE:08-30-2021\0");
-  }else if (req == "3" && bPrintMeta){
+  }else if (req == "3" && bPrintMeta)
+  {
     Wire.write("EDIT:Lehmann, Joel\0");
-  }else if (req == "4" && bPrintMeta){
+  }else if (req == "4" && bPrintMeta)
+  {
     Wire.write("MCU:ESP8266\0");
     bPrintMeta = false;
-  }else if (req == "reqMesCount"){
+  }else if (req == "reqMesCount")
+  {
     Wire.write("3\n");
     bPrintMeta = false;
     bPrintMes = true;
@@ -60,35 +68,34 @@ void requestEvent() {
     bPrintMes = false;
   }else if (req == "reqTemperature")
   {
-    Wire.write((String(bme1.readTempC())+"\0").c_str());
+    Wire.write((String((int)bme1.readTempC())+"\0").c_str());
     bPrintMeta = false;
     bPrintMes = false;
   }else if (req == "reqHumidity")
   {
-    Wire.write((String(bme1.readHumidity())+"\0").c_str());
+    Wire.write((String((int)bme1.readHumidity())+"\0").c_str());
     bPrintMeta = false;
     bPrintMes = false;
   }else if (req == "reqPressure")
   {
-    Wire.write((String(bme1.readPressure())+"\0").c_str());
+    Wire.write((String((int)bme1.readPressure())+"\0").c_str());
     bPrintMeta = false;
     bPrintMes = false;
   }
-  req = "";
-  
+  req = ""; 
 }
 
 //######################################################################
 // Wire On Receive #####################################################
 //######################################################################
 
-void receiveEvent(size_t howMany) {
+void receiveEvent(size_t howMany) 
+{
   Serial.println("Received something");
   (void) howMany;
   while (1 < Wire.available()) 
   {
-    request = Wire.read();
-    
+    request = Wire.read(); 
     req = req + request;
   }
     Serial.println(req);
@@ -98,12 +105,12 @@ void receiveEvent(size_t howMany) {
 // Setup ###############################################################
 //######################################################################
 
-void setup() {
+void setup() 
+{
   Serial.begin(9600);
   Wire.begin(SDA_PIN, SCL_PIN, I2C_SLAVE);
   Wire.onRequest(requestEvent);
   Wire.onReceive(receiveEvent);
-
   bme1.parameter.communication = 1;
   bme1.parameter.SPI_cs = D6;        
   bme1.parameter.SPI_mosi = D5;                       
@@ -117,20 +124,15 @@ void setup() {
   bme1.parameter.pressOversampling = 0b101;
   bme1.parameter.tempOutsideCelsius = 15; 
   bme1.parameter.tempOutsideFahrenheit = 59;
-
-    if (bme1.init() != 0x60)
+  if (bme1.init() != 0x60)
   {    
-    Serial.println(F("Ops! First BME280 Sensor not found!"));
+    Serial.println(F("BME280 Sensor not found!"));
     bme1Detected = 0;
   }
-
   else
   {
-    Serial.println(F("First BME280 Sensor detected!"));
     bme1Detected = 1;
   }
-
-  
 }
 
 void loop() {}
